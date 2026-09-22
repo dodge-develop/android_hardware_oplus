@@ -33,6 +33,8 @@ type vendor_reserve_partition, dev_type;
 
 # Sensors
 type ssc_interactive_device, dev_type;
+# Screenshot region fed to the fusion/CWB leak compensation by the sensor HAL.
+type ssc_screenshot_info_device, dev_type;
 
 # TOF
 type vendor_tof_device, dev_type;
