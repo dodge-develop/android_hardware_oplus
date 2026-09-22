@@ -9,6 +9,15 @@ hal_server_domain(hal_oplus_displaypanelfeature_aidl, vendor_hal_oplus_displaypa
 
 hal_attribute_service(vendor_hal_oplus_displaypanelfeature, hal_oplus_displaypanel_aidl_service)
 
+# system_server (the OPLUS fusion-light engine in libsensorservice) probes
+# IDisplayPanelFeature for the panel APL/brightness. hal_client_domain alone
+# only grants the service_manager find, NOT the binder call: without
+# binder_call the engine finds the service, the call is denied and
+# AidlDisplayPanelFeature::getService() dereferences null, crashing
+# system_server in android.bg on every BrightnessTracker sensor registration.
+hal_client_domain(system_server, vendor_hal_oplus_displaypanelfeature)
+binder_call(system_server, hal_oplus_displaypanelfeature_aidl)
+
 add_service(hal_oplus_displaypanelfeature_aidl, dpa_service)
 
 allow hal_oplus_displaypanelfeature_aidl graphics_device:chr_file rw_file_perms;

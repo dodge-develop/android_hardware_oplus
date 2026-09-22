@@ -15,6 +15,11 @@ allow hal_oplus_sensor_aidl vendor_reserve_partition:blk_file r_file_perms;
 
 allow hal_oplus_sensor_aidl mnt_vendor_file:dir search;
 
+# Streams the screenshot region the fusion/CWB leak compensation subtracts.
+# Without this the node keeps the generic device label, which
+# neverallow domain device:chr_file { open read write } forbids.
+allow hal_oplus_sensor_aidl ssc_screenshot_info_device:chr_file rw_file_perms;
+
 r_dir_file(hal_oplus_sensor_aidl, vendor_persist_engineer_file)
 r_dir_file(hal_oplus_sensor_aidl, vendor_persist_sensors_file)
 rw_dir_file(hal_oplus_sensor_aidl, vendor_proc_eng_cali_file)
