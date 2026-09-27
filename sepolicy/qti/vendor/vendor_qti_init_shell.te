@@ -10,3 +10,31 @@ allow vendor_qti_init_shell vendor_spunvm_file:dir r_dir_perms;
 
 create_dir_file(vendor_qti_init_shell, mnt_vendor_file)
 rw_dir_file(vendor_qti_init_shell, vendor_proc_oplus_scheduler)
+
+# The post-boot tuning scripts (init.kernel.post_boot-sun*.sh) run in this
+# domain. CAF grants proc_sched write only
+# (device/qcom/sepolicy_vndr/sm8750/generic/vendor/common/init_shell.te), via
+# w_file_perms = { open append write lock map }: no dir search and no read.
+# Without dir search the shell cannot reach anything under /proc/sys/walt, so
+# every "echo > /proc/sys/walt/..." silently fails and the WALT baseline stays
+# at walt_config() kernel defaults. Measured on dodge, script value vs actual:
+#   input_boost_freq      "864000 0 0 0 0 0 0 0" -> 0 x8
+#   input_boost_ms        100                    -> 40
+#   sched_ed_boost        10                     -> 0
+#   sched_pipeline_cpus   56                     -> 0
+#   walt_low_latency_task_threshold 325          -> 0
+#   cluster0/smart_freq/ipc_freq_levels 2400000... -> 2147483647 (uncapped)
+# while the /sys/... cpufreq tunables written by the same script do land
+# (hispeed_freq 1344000, rtg_boost_freq 787200, governor walt), because they
+# carry a different label this domain may already traverse. That split is the
+# signature of a denied directory search rather than a script that never ran.
+#
+# read matters as much as write here: the script feeds two proc_sched nodes
+# back into expr to derive the early up/downmigrate values
+# (init.kernel.post_boot-sun_default_6_2.sh:103-104); without file read those
+# expand empty and the derived writes would be garbage even once traversal
+# works.
+#
+# Same shape as the rw_dir_file above and as hal_power_default already has for
+# proc_sched, so this adds no reach the tuning interface did not already have.
+rw_dir_file(vendor_qti_init_shell, proc_sched)
