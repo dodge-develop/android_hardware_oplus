@@ -23,4 +23,7 @@ add_service(hal_oplus_displaypanelfeature_aidl, dpa_service)
 allow hal_oplus_displaypanelfeature_aidl graphics_device:chr_file rw_file_perms;
 
 get_prop(hal_oplus_displaypanelfeature_aidl, boot_status_prop)
-get_prop(hal_oplus_displaypanelfeature_aidl, vendor_display_prop)
+# OplusFusionLightConfig::loadStableConfig() reads a camera-namespace property
+# through this HAL at sensor activation; denied it fell back to defaults and left
+# the fusion light config incomplete.
+get_prop(hal_oplus_displaypanelfeature_aidl, vendor_camera_prop)
